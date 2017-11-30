@@ -8,7 +8,7 @@
  * @api public
  */
 
-function EvenEmitter() {
+function EventEmitter() {
   this._events = {};
 }
 
@@ -19,7 +19,7 @@ function EvenEmitter() {
  * @returns {Array}
  * @api public
  */
-EvenEmitter.prototype.listeners = function listeners(event) {
+EventEmitter.prototype.listeners = function listeners(event) {
   return Array.apply(this, this._events[event] || []);
 }
 
@@ -31,7 +31,7 @@ EvenEmitter.prototype.listeners = function listeners(event) {
  * @api public
  */
 
-EvenEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
   if (!this._events[event]) return false;
 
   var listeners = this._events[event]
@@ -41,6 +41,10 @@ EvenEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
   , args
   , i;
 
+  console.log('listeners: ', listeners);
+  console.log('length: ', length);
+  console.log('handler: ', handler);
+  console.log('this: ', this);
   if (1 === length) {
     switch(len) {
       case 1:
@@ -91,8 +95,9 @@ EvenEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 
 EventEmitter.prototype.on = function on(event, fn) {
   if (!this._events[event]) this._events[event] = [];
+  console.log('fn: ', fn);
   this._events[event].push(fn);
-
+  console.log('_events: ', this._events[event]);
   return this;
 }
 
@@ -158,5 +163,12 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
   return this;
 }
 
+//
+// Expose the module.
+//
 EventEmitter.EventEmitter = EventEmitter;
-module.exports = EventEmitter;
+EventEmitter.EventEmitter2 = EventEmitter;
+EventEmitter.EventEmitter3 = EventEmitter;
+
+try { module.exports = EventEmitter; }
+catch(e) {}
