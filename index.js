@@ -32,7 +32,7 @@ EventEmitter.prototype.listeners = function listeners(event) {
  */
 
 EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-  if (!this._events[event]) return false;
+  if (!this._events || !this._events[event]) return false;
 
   var listeners = this._events[event]
   , length = listeners.length
@@ -93,6 +93,7 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
  */
 
 EventEmitter.prototype.on = function on(event, fn) {
+  if (!this._events) this._events = {};
   if (!this._events[event]) this._events[event] = [];
   this._events[event].push(fn);
   return this;
@@ -146,6 +147,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn) {
  * @api public
  */
 EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+  if (!this._events) return this;
   if (event) this._events[event] = null;
   else this._events = {};
 
@@ -157,6 +159,13 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
 //
 EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
 EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+//
+// This function doesn't apply anymore.
+//
+EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
+  return this;
+}
 
 //
 // Expose the module.
