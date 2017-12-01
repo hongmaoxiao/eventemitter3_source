@@ -68,6 +68,8 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 
         handler.apply(this, args);
     }
+
+    if (handler.once) this.removeListener(event, handler);
   } else {
     for (i = 1, args = new Array(len - 1); i < len; i++) {
       args[i - 1] = arguments[i];
@@ -75,6 +77,7 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 
     for (i = 0; i < length; i++) {
       listeners[i].apply(this, args);
+      if (listeners[i].once) this.removeListener(event, handler[i]);
     }
   }
 
@@ -104,13 +107,8 @@ EventEmitter.prototype.on = function on(event, fn) {
  */
 
 EventEmitter.prototype.once = function once(event, fn) {
-  function eject() {
-    this.removeListener(event, eject);
-    fn.apply(this, arguments);
-  }
-
-  eject.fn = fn;
-  return this.on(event, eject);
+  fn.once = true;
+  return this.on(event, fn);
 }
 
 /**
