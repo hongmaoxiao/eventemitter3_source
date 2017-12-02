@@ -19,8 +19,10 @@ var EventEmitter2 = require('eventemitter2').EventEmitter2
   , Master = require('../../').EventEmitter
   , Drip = require('drip').EventEmitter;
 
-function handle() {
+function foo() {
   if (arguments.length > 100) console.log('damn');
+
+  return 1;
 }
 
 /**
@@ -30,25 +32,41 @@ var ee2 = new EventEmitter2()
   , ee3 = new EventEmitter3()
   , ee1 = new EventEmitter1()
   , master = new Master()
-  , drip = new Drip();
+  , drip = new Drip()
+  , j, i;
+
+for (i = 0; i < 10; i++) {
+  for (j = 0; j < 10; j++) {
+    ee1.on('event:' + i, foo);
+    ee2.on('event:' + i, foo);
+    ee3.on('event:' + i, foo);
+    drip.on('event:' + i, foo);
+    master.on('event:' + i, foo);
+  }
+}
 
 (
   new benchmark.Suite()
 ).add('EventEmitter 1', function test1() {
-  ee1.on('foo', handle);
-  ee1.removeListener('foo', handle);
+  for (i = 0; i < 10; i++) {
+    ee1.emit('event:' + i);
+  }
 }).add('EventEmitter 2', function test2() {
-  ee2.on('foo', handle);
-  ee2.removeListener('foo', handle);
+  for (i = 0; i < 10; i++) {
+    ee2.emit('event:' + i);
+  }
 }).add('EventEmitter 3', function test2() {
-  ee3.on('foo', handle);
-  ee3.removeListener('foo', handle);
+  for (i = 0; i < 10; i++) {
+    ee3.emit('event:' + i);
+  }
 }).add('EventEmitter 3 (master)', function test2() {
-  master.on('foo', handle);
-  master.removeListener('foo', handle);
+  for (i = 0; i < 10; i++) {
+    master.emit('event:' + i);
+  }
 }).add('Drip', function test2() {
-  drip.on('foo', handle);
-  drip.removeListener('foo', handle);
+  for (i = 0; i < 10; i++) {
+    drip.emit('event:' + i);
+  }
 }).on('cycle', function cycle(e) {
   var details = e.target;
 

@@ -3,8 +3,7 @@
 /**
  * Benchmark related modules.
  */
-var benchmark = require('benchmark')
-  , microtime = require('microtime');
+var benchmark = require('benchmark');
 
 /**
  * Logger.
@@ -61,7 +60,7 @@ var ee2 = new EventEmitter2()
     , details.hz
   );
 }).on('complete', function completed() {
-  logger.info('Benchmark: "%s" is was the fastest.'
+  logger.info('Benchmark: "%s" is the fastest.'
     , this.filter('fastest').pluck('name')
   );
 }).run();
