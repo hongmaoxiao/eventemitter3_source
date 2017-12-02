@@ -185,10 +185,15 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
   , events = [];
 
   if (fn) {
-    if (listeners.fn && (listeners.fn !== fn || (once && !listeners.once))) {
-      events.push(listeners);
-    }
-    if (!listeners.fn) {
+    if (listeners.fn) {
+      if (
+          listeners.fn !== fn
+        || (once && !listeners.once)
+        || (context && listeners[i].context !== context)
+      ) {
+        events.push(listeners);
+      }
+    } else {
       for (var i = 0, length = listeners.length; i < length; i++) {
         if (
           listeners[i].fn !== fn
