@@ -116,7 +116,7 @@ EventEmitter.prototype.listeners = function listeners(event, exists) {
 EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
   var evt = prefix ? prefix + event : event;
 
-  if (this._events[evt]) return false;
+  if (!this._events[evt]) return false;
 
   var listeners = this._events[evt]
   , len = arguments.length
@@ -238,7 +238,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
     if (
         listeners.fn === fn
       && (!once || listeners.once)
-      && (!context || listeners[i].context === context)
+      && (!context || listeners.context === context)
     ) {
       if (--this._eventsCount === 0) this._events = new Events();
       else delete this._events[evt];
