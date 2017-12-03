@@ -27,21 +27,29 @@ var ee1 = new EventEmitter1()
 (
   new benchmark.Suite()
 ).add('EventEmitter1', function() {
-  ee1.once('foo', handle).emit('foo');
+  ee1.on('foo', handle);
+  ee1.removeListener('foo', handle);
 }).add('EventEmitter2', function() {
-  ee2.once('foo', handle).emit('foo');
+  ee2.on('foo', handle);
+  ee2.removeListener('foo', handle);
 }).add('EventEmitter3@0.1.6', function() {
-  ee3.once('foo', handle).emit('foo');
+  ee3.on('foo', handle);
+  ee3.removeListener('foo', handle);
 }).add('EventEmitter3(master)', function() {
-  master.once('foo', handle).emit('foo');
+  master.on('foo', handle);
+  master.removeListener('foo', handle);
 }).add('Drip', function() {
-  drip.once('foo', handle).emit('foo');
+  drip.on('foo', handle);
+  drip.removeListener('foo', handle);
 }).add('fastemitter', function() {
-  fe.once('foo', handle).emit('foo');
+  fe.on('foo', handle);
+  fe.removeListener('foo', handle);
 }).add('event-emitter', function() {
-  ee.once('foo', handle).emit('foo');
+  ee.on('foo', handle);
+  ee.off('foo', handle);
 }).add('contra/emitter', function() {
-  ce.once('foo', handle).emit('foo');
+  ce.on('foo', handle);
+  ce.off('foo', handle);
 }).on('cycle', function cycle(e) {
   console.log(e.target.toString());
 }).on('complete', function completed() {

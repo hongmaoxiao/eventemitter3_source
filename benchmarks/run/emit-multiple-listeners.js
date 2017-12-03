@@ -5,35 +5,49 @@ var benchmark = require('benchmark');
 var EventEmitter2 = require('eventemitter2').EventEmitter2
   , EventEmitter1 = require('events').EventEmitter
   , EventEmitter3 = require('eventemitter3')
-  , Drip = require('drip').EventEmitter
   , CE = require('contra/emitter')
   , EE = require('event-emitter')
   , FE = require('fastemitter')
   , Master = require('../../');
 
-var ctx = { foo: 'bar' };
-
-function handle() {
+function foo() {
   if (arguments.length > 100) console.log('damn');
+
+  return 1;
+}
+
+function bar() {
+  if (arguments.length > 100) console.log('damn');
+
+  return false;
+}
+
+function baz() {
+  if (arguments.length > 100) console.log('damn');
+
+  return true;
 }
 
 var ee1 = new EventEmitter1()
   , ee2 = new EventEmitter2()
   , ee3 = new EventEmitter3()
   , master = new Master()
-  , drip = new Drip()
   , fe = new FE()
   , ce = CE()
   , ee = EE();
 
-ee3.on('foo', handle, ctx);
-ee2.on('foo', handle.bind(ctx));
-ee1.on('foo', handle.bind(ctx));
-drip.on('foo', handle.bind(ctx));
-master.on('foo', handle, ctx);
-ee.on('foo', handle.bind(ctx));
-fe.on('foo', handle.bind(ctx));
-ce.on('foo', handle.bind(ctx));
+ce.on('foo', foo).on('foo', bar).on('foo', baz);
+ee.on('foo', foo).on('foo', bar).on('foo', baz);
+fe.on('foo', foo).on('foo', bar).on('foo', baz);
+ee3.on('foo', foo).on('foo', bar).on('foo', baz);
+ee2.on('foo', foo).on('foo', bar).on('foo', baz);
+ee1.on('foo', foo).on('foo', bar).on('foo', baz);
+master.on('foo', foo).on('foo', bar).on('foo', baz);
+
+//
+// Drip is omitted as it throws an error.
+// Ref: https://github.com/qualiancy/drip/pull/4
+//
 
 (
   new benchmark.Suite()
@@ -57,11 +71,6 @@ ce.on('foo', handle.bind(ctx));
   master.emit('foo', 'bar');
   master.emit('foo', 'bar', 'baz');
   master.emit('foo', 'bar', 'baz', 'boom');
-}).add('Drip', function() {
-  drip.emit('foo');
-  drip.emit('foo', 'bar');
-  drip.emit('foo', 'bar', 'baz');
-  drip.emit('foo', 'bar', 'baz', 'boom');
 }).add('fastemitter', function() {
   fe.emit('foo');
   fe.emit('foo', 'bar');
