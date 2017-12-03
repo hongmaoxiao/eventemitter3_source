@@ -54,6 +54,7 @@ function EE(fn, context, once) {
 
 function EventEmitter() {
   this._events = new Events();
+  this._eventsCount = 0;
 }
 
 /**
@@ -64,11 +65,13 @@ function EventEmitter() {
  * @api public
  */
 EventEmitter.prototype.eventNames = function eventNames() {
-  var events = this._events
-    , names = []
+  var names = []
+    , events
     , name;
 
-  for (name in events) {
+  if (this._eventsCount === 0) return names;
+
+  for (name in (events = this._events)) {
     if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
   }
 
@@ -176,13 +179,11 @@ EventEmitter.prototype.on = function on(event, fn, context) {
   var listener = new EE(fn, context || this)
     , evt = prefix ? prefix + event : event;
 
-  if (!this._events[evt]) this._events[evt] = listener;
-  else {
-    if (!this._events[evt].fn) {
-      this._events[evt].push(listener)
-    } else {
-      this._events[evt] = [this._events[evt], listener];
-    }
+  if (!this._events[evt]) this._events[evt] = listener, this._eventsCount++;
+  else if (!this._events[evt].fn) {
+    this._events[evt].push(listener)
+  } else {
+    this._events[evt] = [this._events[evt], listener];
   }
 
   return this;
@@ -201,13 +202,11 @@ EventEmitter.prototype.once = function once(event, fn, context) {
   var listener = new EE(fn, context || this, true)
     , evt = prefix ? prefix + event : event;
 
-  if (!this._events[evt]) this._events[evt] = listener;
-  else {
-    if (!this._events[evt].fn) {
-      this._events[evt].push(listener);
-    } else {
-      this._events[evt] = [this._events[evt], listener];
-    }
+  if (!this._events[evt]) this._events[evt] = listener, this._eventsCount++;
+  else if (!this._events[evt].fn) {
+    this._events[evt].push(listener)
+  } else {
+    this._events[evt] = [this._events[evt], listener];
   }
 
   return this;
@@ -226,7 +225,11 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
   var evt = prefix ? prefix + event : event;
 
   if (!this._events[evt]) return this;
-  if (!fn) return delete this._events[evt], this;
+  if (!fn) {
+    if (--this._eventsCount === 0) this._events = new Events();
+    else delete this._events[evt];
+    return this;
+  }
 
   var listeners = this._events[evt];
 
@@ -236,7 +239,8 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
       && (!once || listeners.once)
       && (!context || listeners[i].context === context)
     ) {
-      delete this._events[evt];
+      if (--this._eventsCount === 0) this._events = new Events();
+      else delete this._events[evt];
     }
   } else {
     for (var i = 0, events = [], length = listeners.length; i < length; i++) {
@@ -254,6 +258,8 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
     //
     if (events.length) {
       this._events[evt] = events.length === 1 ? events[0] : events;
+    } else if (--this._eventsCount === 0) {
+      this._events = new Events();
     } else {
       delete this._events[evt];
     }
@@ -269,8 +275,18 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
  * @api public
  */
 EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
-  if (event) delete this._events[prefix ? prefix + event : event];
-  else this._events = new Events();
+  var evt;
+
+  if (event) {
+    evt = prefix ? prefix + event : event;
+    if (this._events[evt]) {
+      if (--this._eventsCount === 0) this._events = new Events();
+      else delete this._events[evt];
+    }
+  } else {
+    this._events = new Events();
+    this._eventsCount = 0;
+  }
 
   return this;
 }
